@@ -25,9 +25,9 @@ import {
 } from "../reducers/post";
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from "../reducers/user";
 
-function addPostAPI(data) {
-    return axios.post("/api/post", data);
-}
+// function addPostAPI(data) {
+//     return axios.post("/api/post", data);
+// }
 
 function* addPost(action) {
     try {
@@ -54,11 +54,11 @@ function* addPost(action) {
     }
 }
 
-function loadPostsAPI(data) {
-    return axios.get("/api/post", data);
-}
+// function loadPostsAPI(data) {
+//     return axios.get("/api/post", data);
+// }
 
-function* loadPosts(action) {
+function* loadPosts() {
     try {
         // const result = yield call(loadPostsAPI, action.data);
         yield delay(1000);
@@ -75,9 +75,10 @@ function* loadPosts(action) {
     }
 }
 
-function removeAPI(data) {
-    return axios.delete("/api/post", data);
-}
+// function removeAPI(data) {
+//     return axios.delete("/api/post", data);
+// }
+
 function* removePost(action) {
     try {
         // const result = yield call(removeAPI, action.data);
@@ -98,9 +99,9 @@ function* removePost(action) {
         });
     }
 }
-function addCommentAPI(data) {
-    return axios.post(`/api/post/${data.postId}/comment`, data);
-}
+// function addCommentAPI(data) {
+//     return axios.post(`/api/post/${data.postId}/comment`, data);
+// }
 
 function* addComment(action) {
     try {
