@@ -12,7 +12,7 @@ import {
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
 import { REMOVE_POST_REQUEST } from "../reducers/post";
-
+import FollowButton from "./FollowButton";
 export default function PostCard({ post }) {
     const dispatch = useDispatch();
     const { removePostLoading } = useSelector((state) => state.post);
@@ -76,6 +76,7 @@ export default function PostCard({ post }) {
                         <EllipsisOutlined />
                     </Popover>,
                 ]}
+                extra={id && <FollowButton post={post} />}
             >
                 <Card.Meta
                     avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
