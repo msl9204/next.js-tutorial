@@ -60,14 +60,14 @@ function* unfollow(action) {
     }
 }
 
-// function logInAPI() {
-//     return axios.post("/api/login");
-// }
+function logInAPI(data) {
+    return axios.post("/user/login", data);
+}
 
 function* logIn(action) {
     try {
-        // const result = yield call(logInAPI, action.data);
-        yield delay(1000); // 서버가 없을 땐 delay로 비동기적인 효과를 만들어준다.
+        const result = yield call(logInAPI, action.data);
+        // yield delay(1000); // 서버가 없을 땐 delay로 비동기적인 효과를 만들어준다.
         yield put({
             type: LOG_IN_SUCCESS,
             data: action.data,
@@ -82,7 +82,7 @@ function* logIn(action) {
 }
 
 function logOutAPI() {
-    return axios.post("/api/post");
+    return axios.post("/post");
 }
 
 function* logOut() {
@@ -102,13 +102,13 @@ function* logOut() {
 }
 
 function signUpAPI(data) {
-    return axios.post("http://localhost:5000/user", data);
+    return axios.post("/user", data);
 }
 
 function* signUp(action) {
     try {
         const result = yield call(signUpAPI, action.data);
-
+        console.log(result);
         yield put({
             type: SIGN_UP_SUCCESS,
         });
@@ -116,7 +116,7 @@ function* signUp(action) {
         yield put({
             // put은 dispatch라고 보면 됨
             type: SIGN_UP_FAILURE,
-            error: err.response.data,
+            error: err.response.data, // backend의 body가 들어온다
         });
     }
 }

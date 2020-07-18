@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import AppLayout from "../components/AppLayout";
 import Head from "next/head";
+import Router from "next/router";
 import { Form, Input, Checkbox, Button } from "antd";
 import useInput from "../components/hooks/useInput";
 import styled from "styled-components";
@@ -15,11 +16,25 @@ const Signup = () => {
     const [passwordCheck, setPasswordCheck] = useState("");
     const [passwordError, setPasswordError] = useState(false);
     const [email, onChangeEmail] = useInput("");
-    const [nick, onChangeNick] = useInput("");
+    const [nickname, onChangeNick] = useInput("");
     const [password, onChangePassword] = useInput("");
 
     const dispatch = useDispatch();
-    const { signUpLoading } = useSelector((state) => state.user);
+    const { signUpLoading, signUpDone, signUpError } = useSelector(
+        (state) => state.user
+    );
+
+    useEffect(() => {
+        if (signUpDone) {
+            Router.push("/");
+        }
+    }, [signUpDone]);
+
+    useEffect(() => {
+        if (signUpError) {
+            alert(signUpError);
+        }
+    }, [signUpError]);
 
     const onChangePasswordCheck = useCallback(
         (e) => {
@@ -44,10 +59,10 @@ const Signup = () => {
         if (!term) {
             return setTermError(true);
         }
-        console.log(email, nick, password);
+        console.log(email, nickname, password);
         dispatch({
             type: SIGN_UP_REQUEST,
-            data: { email, password, nick },
+            data: { email, password, nickname },
         });
     }, [email, password, passwordCheck, term]);
 
@@ -74,7 +89,7 @@ const Signup = () => {
                         <br />
                         <Input
                             name="user-nick"
-                            value={nick}
+                            value={nickname}
                             required
                             onChange={onChangeNick}
                         />
