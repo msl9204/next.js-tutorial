@@ -70,7 +70,7 @@ function* logIn(action) {
         // yield delay(1000); // 서버가 없을 땐 delay로 비동기적인 효과를 만들어준다.
         yield put({
             type: LOG_IN_SUCCESS,
-            data: action.data,
+            data: result.data,
         });
     } catch (err) {
         yield put({
@@ -82,15 +82,14 @@ function* logIn(action) {
 }
 
 function logOutAPI() {
-    return axios.post("/post");
+    return axios.post("/user/logout");
 }
 
 function* logOut() {
     try {
-        const result = yield call(logOutAPI);
+        yield call(logOutAPI);
         yield put({
             type: LOG_OUT_SUCCESS,
-            data: result.data,
         });
     } catch (err) {
         yield put({

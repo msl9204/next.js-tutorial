@@ -1,16 +1,17 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const passport = require("passport");
-const { User } = require("../models");
+const { User, Post } = require("../models");
+const { isLoggedIn, isNotLoggedIn } = require("./middlewares");
 const router = express.Router();
 
 // err,user,info는 passport strategy done 부분 콜백.
 // 아래 패턴이 미들웨어 확장 패턴
-router.post("/login", (req, res, next) => {
+router.post("/login", isNotLoggedIn, (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
         if (err) {
             console.error(err);
-            next(err);
+            return next(err);
         }
 
         if (info) {
@@ -23,12 +24,35 @@ router.post("/login", (req, res, next) => {
                 return next(loginErr);
             }
 
-            return res.status(200).json(user);
+            const fullUserWithoutPassword = await User.findOne({
+                where: { id: user.id },
+                // 받고싶은 항목 리스트형식으로 컬럼명 적어두면 뽑아온다.
+                // attributes: ["id", "nickname", "email"],
+                // exclude로 넣어 두면, 그 항목만 빼고 뽑아온다.
+                attributes: {
+                    exclude: ["password"],
+                },
+                include: [
+                    {
+                        model: Post,
+                    },
+                    {
+                        model: User,
+                        as: "Followings",
+                    },
+                    {
+                        model: User,
+                        as: "Followers",
+                    },
+                ],
+            });
+
+            return res.status(200).json(fullUserWithoutPassword);
         });
     })(req, res, next);
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", isNotLoggedIn, async (req, res, next) => {
     try {
         const exUser = await User.findOne({
             where: {
@@ -53,7 +77,7 @@ router.post("/", async (req, res, next) => {
         next(error); // status 500
     }
 
-    router.post("/user/logout", (req, res) => {
+    router.post("/logout", isLoggedIn, (req, res) => {
         req.logout();
         req.session.destroy();
         res.send("ok");
