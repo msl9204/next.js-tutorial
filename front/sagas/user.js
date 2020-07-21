@@ -15,6 +15,9 @@ import {
     FOLLOW_FAILURE,
     UNFOLLOW_SUCCESS,
     UNFOLLOW_FAILURE,
+    LOAD_MY_INFO_REQUEST,
+    LOAD_MY_INFO_SUCCESS,
+    LOAD_MY_INFO_FAILURE,
 } from "../reducers/user";
 import axios from "axios";
 
@@ -55,6 +58,27 @@ function* unfollow(action) {
         yield put({
             // put은 dispatch라고 보면 됨
             type: UNFOLLOW_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function loadUserAPI() {
+    return axios.get("/user");
+}
+
+function* loadUser(action) {
+    try {
+        const result = yield call(loadUserAPI, action.data);
+        // yield delay(1000); // 서버가 없을 땐 delay로 비동기적인 효과를 만들어준다.
+        yield put({
+            type: LOAD_MY_INFO_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        yield put({
+            // put은 dispatch라고 보면 됨
+            type: LOAD_MY_INFO_FAILURE,
             error: err.response.data,
         });
     }
@@ -119,6 +143,11 @@ function* signUp(action) {
         });
     }
 }
+function* watchLoadUser() {
+    //while로 감싸줘야 무한하게 로그인 리퀘스트를 받을 수 있다.
+    yield takeLatest(LOAD_MY_INFO_REQUEST, loadUser);
+}
+
 function* watchFollow() {
     //while로 감싸줘야 무한하게 로그인 리퀘스트를 받을 수 있다.
     yield takeLatest(FOLLOW_REQUEST, follow);
@@ -148,6 +177,7 @@ function* watchSignUp() {
 
 export default function* userSaga() {
     yield all([
+        fork(watchLoadUser),
         fork(watchFollow),
         fork(watchUnfollow),
         fork(watchLogIn),

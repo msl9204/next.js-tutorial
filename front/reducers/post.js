@@ -1,6 +1,4 @@
-import shortId from "shortid";
 import produce from "immer";
-import faker from "faker";
 
 export const initialState = {
     mainPosts: [],
@@ -19,32 +17,6 @@ export const initialState = {
     addCommentDone: false,
     addCommentError: null,
 };
-
-export const generateDummyPost = (number) =>
-    Array(number)
-        .fill()
-        .map(() => ({
-            id: shortId.generate(),
-            User: {
-                id: shortId.generate(),
-                nickname: faker.name.findName(),
-            },
-            content: faker.lorem.paragraph(),
-            Images: [
-                {
-                    src: faker.image.image(),
-                },
-            ],
-            Comments: [
-                {
-                    User: {
-                        id: shortId.generate(),
-                        nickname: faker.name.findName(),
-                    },
-                    content: faker.lorem.sentence(),
-                },
-            ],
-        }));
 
 export const LOAD_POSTS_REQUEST = "LOAD_POSTS_REQUEST";
 export const LOAD_POSTS_SUCCESS = "LOAD_POSTS_SUCCESS";
@@ -72,25 +44,6 @@ export const addComment = (data) => ({
     data,
 });
 
-const dummyPost = (data) => ({
-    id: data.id,
-    content: data.content,
-    User: {
-        id: 1,
-        nickname: "제로초",
-    },
-    Images: [],
-    Comments: [],
-});
-
-const dummyComment = (data) => ({
-    id: shortId.generate(),
-    content: data,
-    User: {
-        id: 1,
-        nickname: "제로초",
-    },
-});
 const reducer = (state = initialState, action) => {
     return produce(state, (draft) => {
         switch (action.type) {
@@ -121,7 +74,7 @@ const reducer = (state = initialState, action) => {
             case ADD_POST_SUCCESS:
                 draft.addPostLoading = false;
                 draft.addPostDone = true;
-                draft.mainPosts.unshift(dummyPost(action.data));
+                draft.mainPosts.unshift(action.data);
                 break;
 
             case ADD_POST_FAILURE:
@@ -156,9 +109,9 @@ const reducer = (state = initialState, action) => {
 
             case ADD_COMMENT_SUCCESS: {
                 const post = draft.mainPosts.find(
-                    (v) => v.id === action.data.postId
+                    (v) => v.id === action.data.PostId
                 );
-                post.Comments.unshift(dummyComment(action.data.content));
+                post.Comments.unshift(action.data);
                 draft.addCommentLoading = false;
                 draft.addCommentDone = true;
 

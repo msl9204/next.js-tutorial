@@ -5,6 +5,45 @@ const { User, Post } = require("../models");
 const { isLoggedIn, isNotLoggedIn } = require("./middlewares");
 const router = express.Router();
 
+router.get("/", async (req, res, next) => {
+    try {
+        if (req.user) {
+            const fullUserWithoutPassword = await User.findOne({
+                where: { id: req.user.id },
+                // 받고싶은 항목 리스트형식으로 컬럼명 적어두면 뽑아온다.
+                // attributes: ["id", "nickname", "email"],
+                // exclude로 넣어 두면, 그 항목만 빼고 뽑아온다.
+                attributes: {
+                    exclude: ["password"],
+                },
+                include: [
+                    {
+                        model: Post,
+                        attributes: ["id"],
+                    },
+                    {
+                        model: User,
+                        as: "Followings",
+                        attributes: ["id"],
+                    },
+                    {
+                        model: User,
+                        as: "Followers",
+                        attributes: ["id"],
+                    },
+                ],
+            });
+
+            res.status(200).json(fullUserWithoutPassword);
+        } else {
+            res.status(200).json(null);
+        }
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+
 // err,user,info는 passport strategy done 부분 콜백.
 // 아래 패턴이 미들웨어 확장 패턴
 router.post("/login", isNotLoggedIn, (req, res, next) => {
@@ -35,14 +74,17 @@ router.post("/login", isNotLoggedIn, (req, res, next) => {
                 include: [
                     {
                         model: Post,
+                        attributes: ["id"],
                     },
                     {
                         model: User,
                         as: "Followings",
+                        attributes: ["id"],
                     },
                     {
                         model: User,
                         as: "Followers",
+                        attributes: ["id"],
                     },
                 ],
             });
