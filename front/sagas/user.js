@@ -18,6 +18,9 @@ import {
     LOAD_MY_INFO_REQUEST,
     LOAD_MY_INFO_SUCCESS,
     LOAD_MY_INFO_FAILURE,
+    CHANGE_NICKNAME_REQUEST,
+    CHANGE_NICKNAME_SUCCESS,
+    CHANGE_NICKNAME_FAILURE,
 } from "../reducers/user";
 import axios from "axios";
 
@@ -58,6 +61,27 @@ function* unfollow(action) {
         yield put({
             // put은 dispatch라고 보면 됨
             type: UNFOLLOW_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function changeNicknameAPI(data) {
+    return axios.patch("/user/nickname", { nickname: data });
+}
+
+function* changeNickname(action) {
+    try {
+        const result = yield call(changeNicknameAPI, action.data);
+        // yield delay(1000); // 서버가 없을 땐 delay로 비동기적인 효과를 만들어준다.
+        yield put({
+            type: CHANGE_NICKNAME_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        yield put({
+            // put은 dispatch라고 보면 됨
+            type: CHANGE_NICKNAME_FAILURE,
             error: err.response.data,
         });
     }
@@ -143,6 +167,11 @@ function* signUp(action) {
         });
     }
 }
+function* watchChangeNickname() {
+    //while로 감싸줘야 무한하게 로그인 리퀘스트를 받을 수 있다.
+    yield takeLatest(CHANGE_NICKNAME_REQUEST, changeNickname);
+}
+
 function* watchLoadUser() {
     //while로 감싸줘야 무한하게 로그인 리퀘스트를 받을 수 있다.
     yield takeLatest(LOAD_MY_INFO_REQUEST, loadUser);
@@ -177,6 +206,7 @@ function* watchSignUp() {
 
 export default function* userSaga() {
     yield all([
+        fork(watchChangeNickname),
         fork(watchLoadUser),
         fork(watchFollow),
         fork(watchUnfollow),

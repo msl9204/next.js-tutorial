@@ -1,13 +1,5 @@
 import axios from "axios";
-import {
-    all,
-    delay,
-    fork,
-    put,
-    takeLatest,
-    throttle,
-    call,
-} from "redux-saga/effects";
+import { all, fork, put, takeLatest, throttle, call } from "redux-saga/effects";
 import {
     ADD_COMMENT_FAILURE,
     ADD_COMMENT_REQUEST,
@@ -21,8 +13,56 @@ import {
     LOAD_POSTS_REQUEST,
     LOAD_POSTS_SUCCESS,
     LOAD_POSTS_FAILURE,
+    LIKE_POST_REQUEST,
+    UNLIKE_POST_REQUEST,
+    LIKE_POST_SUCCESS,
+    LIKE_POST_FAILURE,
+    UNLIKE_POST_SUCCESS,
+    UNLIKE_POST_FAILURE,
 } from "../reducers/post";
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from "../reducers/user";
+
+function likePostAPI(data) {
+    return axios.patch(`/post/${data}/like`);
+}
+
+function* likePost(action) {
+    try {
+        const result = yield call(likePostAPI, action.data);
+        // yield delay(1000);
+        yield put({
+            type: LIKE_POST_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        yield put({
+            // put은 dispatch라고 보면 됨
+            type: LIKE_POST_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
+
+function unlikePostAPI(data) {
+    return axios.delete(`/post/${data}/like`);
+}
+
+function* unlikePost(action) {
+    try {
+        const result = yield call(unlikePostAPI, action.data);
+        // yield delay(1000);
+        yield put({
+            type: UNLIKE_POST_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        yield put({
+            // put은 dispatch라고 보면 됨
+            type: UNLIKE_POST_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
 
 function addPostAPI(data) {
     return axios.post("/post", { content: data });
@@ -70,17 +110,17 @@ function* loadPosts(action) {
     }
 }
 
-// function removeAPI(data) {
-//     return axios.delete("/api/post", data);
-// }
+function removeAPI(data) {
+    return axios.delete(`/post/${data}`);
+}
 
 function* removePost(action) {
     try {
-        // const result = yield call(removeAPI, action.data);
-        yield delay(1000);
+        const result = yield call(removeAPI, action.data);
+        // yield delay(1000);
         yield put({
             type: REMOVE_POST_SUCCESS,
-            data: action.data,
+            data: result.data,
         });
         yield put({
             type: REMOVE_POST_OF_ME,
@@ -115,6 +155,14 @@ function* addComment(action) {
     }
 }
 
+function* watchLikePost() {
+    yield throttle(5000, LIKE_POST_REQUEST, likePost);
+}
+
+function* watchUnlikePost() {
+    yield throttle(5000, UNLIKE_POST_REQUEST, unlikePost);
+}
+
 function* watchAddPost() {
     yield throttle(5000, ADD_POST_REQUEST, addPost);
 }
@@ -132,6 +180,8 @@ function* watchAddComment() {
 
 export default function* postSaga() {
     yield all([
+        fork(watchLikePost),
+        fork(watchUnlikePost),
         fork(watchAddPost),
         fork(watchLoadPosts),
         fork(watchRemovePost),
