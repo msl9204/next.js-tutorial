@@ -1,4 +1,4 @@
-import { all, fork, takeLatest, put, delay, call } from "redux-saga/effects";
+import { all, fork, takeLatest, put, call } from "redux-saga/effects";
 import {
     LOG_IN_REQUEST,
     LOG_IN_SUCCESS,
@@ -21,20 +21,95 @@ import {
     CHANGE_NICKNAME_REQUEST,
     CHANGE_NICKNAME_SUCCESS,
     CHANGE_NICKNAME_FAILURE,
+    LOAD_FOLLOWERS_REQUEST,
+    LOAD_FOLLOWINGS_REQUEST,
+    LOAD_FOLLOWERS_SUCCESS,
+    LOAD_FOLLOWERS_FAILURE,
+    LOAD_FOLLOWINGS_SUCCESS,
+    LOAD_FOLLOWINGS_FAILURE,
+    REMOVE_FOLLOWER_REQUEST,
+    REMOVE_FOLLOWER_SUCCESS,
+    REMOVE_FOLLOWER_FAILURE,
 } from "../reducers/user";
 import axios from "axios";
 
-// function followAPI() {
-//     return axios.post("/api/follow");
-// }
+function removeFollowerAPI(data) {
+    return axios.delete(`/user/follower/${data}`);
+}
+
+function* removeFollower(action) {
+    try {
+        const result = yield call(removeFollowerAPI, action.data);
+        // yield delay(1000);
+        console.log("ers", result);
+        yield put({
+            type: REMOVE_FOLLOWER_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        yield put({
+            // put은 dispatch라고 보면 됨
+            type: REMOVE_FOLLOWER_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function loadFollowersAPI(data) {
+    return axios.get(`/user/followers`, data);
+}
+
+function* loadFollowers(action) {
+    try {
+        const result = yield call(loadFollowersAPI, action.data);
+        // yield delay(1000);
+        console.log("ers", result);
+        yield put({
+            type: LOAD_FOLLOWERS_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        yield put({
+            // put은 dispatch라고 보면 됨
+            type: LOAD_FOLLOWERS_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function loadFollowingsAPI(data) {
+    return axios.get(`/user/followings`, data);
+}
+
+function* loadFollowings(action) {
+    try {
+        const result = yield call(loadFollowingsAPI, action.data);
+        // yield delay(1000);
+        console.log("ings", result);
+        yield put({
+            type: LOAD_FOLLOWINGS_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        yield put({
+            // put은 dispatch라고 보면 됨
+            type: LOAD_FOLLOWINGS_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function followAPI(data) {
+    return axios.patch(`/user/${data}/follow`);
+}
 
 function* follow(action) {
     try {
-        // const result = yield call(followAPI, action.data);
-        yield delay(1000);
+        const result = yield call(followAPI, action.data);
+        // yield delay(1000);
         yield put({
             type: FOLLOW_SUCCESS,
-            data: action.data,
+            data: result.data,
         });
     } catch (err) {
         yield put({
@@ -45,17 +120,17 @@ function* follow(action) {
     }
 }
 
-// function unfollowAPI() {
-//     return axios.post("/api/unfollow");
-// }
+function unfollowAPI(data) {
+    return axios.delete(`/user/${data}/follow`);
+}
 
 function* unfollow(action) {
     try {
-        // const result = yield call(unfollowAPI, action.data);
-        yield delay(1000);
+        const result = yield call(unfollowAPI, action.data);
+        // yield delay(1000);
         yield put({
             type: UNFOLLOW_SUCCESS,
-            data: action.data,
+            data: result.data,
         });
     } catch (err) {
         yield put({
@@ -167,6 +242,22 @@ function* signUp(action) {
         });
     }
 }
+
+function* watchRemoveFollwer() {
+    //while로 감싸줘야 무한하게 로그인 리퀘스트를 받을 수 있다.
+    yield takeLatest(REMOVE_FOLLOWER_REQUEST, removeFollower);
+}
+
+function* watchLoadFollwers() {
+    //while로 감싸줘야 무한하게 로그인 리퀘스트를 받을 수 있다.
+    yield takeLatest(LOAD_FOLLOWERS_REQUEST, loadFollowers);
+}
+
+function* watchLoadFollowings() {
+    //while로 감싸줘야 무한하게 로그인 리퀘스트를 받을 수 있다.
+    yield takeLatest(LOAD_FOLLOWINGS_REQUEST, loadFollowings);
+}
+
 function* watchChangeNickname() {
     //while로 감싸줘야 무한하게 로그인 리퀘스트를 받을 수 있다.
     yield takeLatest(CHANGE_NICKNAME_REQUEST, changeNickname);
@@ -206,6 +297,9 @@ function* watchSignUp() {
 
 export default function* userSaga() {
     yield all([
+        fork(watchRemoveFollwer),
+        fork(watchLoadFollwers),
+        fork(watchLoadFollowings),
         fork(watchChangeNickname),
         fork(watchLoadUser),
         fork(watchFollow),
