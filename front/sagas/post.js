@@ -19,8 +19,33 @@ import {
     LIKE_POST_FAILURE,
     UNLIKE_POST_SUCCESS,
     UNLIKE_POST_FAILURE,
+    UPLOAD_IMAGES_REQUEST,
+    UPLOAD_IMAGES_SUCCESS,
+    UPLOAD_IMAGES_FAILURE,
 } from "../reducers/post";
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from "../reducers/user";
+
+// form 데이터는 그대로 보내야한다 {}로 씌우면 안됨!
+function uploadImagesAPI(data) {
+    return axios.post(`/post/images`, data);
+}
+
+function* uploadImages(action) {
+    try {
+        const result = yield call(uploadImagesAPI, action.data);
+        // yield delay(1000);
+        yield put({
+            type: UPLOAD_IMAGES_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        yield put({
+            // put은 dispatch라고 보면 됨
+            type: UPLOAD_IMAGES_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
 
 function likePostAPI(data) {
     return axios.patch(`/post/${data}/like`);
@@ -65,7 +90,7 @@ function* unlikePost(action) {
 }
 
 function addPostAPI(data) {
-    return axios.post("/post", { content: data });
+    return axios.post("/post", data);
 }
 
 function* addPost(action) {
@@ -155,6 +180,10 @@ function* addComment(action) {
     }
 }
 
+function* watchUploadImages() {
+    yield throttle(5000, UPLOAD_IMAGES_REQUEST, uploadImages);
+}
+
 function* watchLikePost() {
     yield throttle(5000, LIKE_POST_REQUEST, likePost);
 }
@@ -180,6 +209,7 @@ function* watchAddComment() {
 
 export default function* postSaga() {
     yield all([
+        fork(watchUploadImages),
         fork(watchLikePost),
         fork(watchUnlikePost),
         fork(watchAddPost),

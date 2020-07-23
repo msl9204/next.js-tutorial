@@ -33,7 +33,10 @@ export default function ImagesZoom({ images, onClose }) {
                     >
                         {images.map((v) => (
                             <ImgWrapper key={v.src}>
-                                <img src={v.src} alt={v.src} />
+                                <img
+                                    src={`http://localhost:5000/${v.src}`}
+                                    alt={v.src}
+                                />
                             </ImgWrapper>
                         ))}
                     </Slick>

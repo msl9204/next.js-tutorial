@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const db = require("./models");
 const postRouter = require("./routes/post");
@@ -31,6 +32,9 @@ app.use(
         credentials: true, // cookie를 전달하고 싶으면 true로 바꿔줘야함.
     })
 );
+
+// 앞 /는 url 경로가 됨.
+app.use("/", express.static(path.join(__dirname, "uploads")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
