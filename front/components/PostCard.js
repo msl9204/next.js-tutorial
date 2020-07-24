@@ -18,6 +18,7 @@ import {
     RETWEET_REQUEST,
 } from "../reducers/post";
 import FollowButton from "./FollowButton";
+import PostCardContent from "./PostCardContent";
 export default function PostCard({ post }) {
     const dispatch = useDispatch();
     const { removePostLoading } = useSelector((state) => state.post);
@@ -132,14 +133,18 @@ export default function PostCard({ post }) {
                         <Card.Meta
                             avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
                             title={post.User.nickname}
-                            description={post.content}
+                            description={
+                                <PostCardContent postData={post.content} />
+                            }
                         />
                     </Card>
                 ) : (
                     <Card.Meta
                         avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
                         title={post.User.nickname}
-                        description={post.content}
+                        description={
+                            <PostCardContent postData={post.content} />
+                        }
                     />
                 )}
             </Card>
