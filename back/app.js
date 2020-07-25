@@ -4,6 +4,7 @@ const cors = require("cors");
 const db = require("./models");
 const postRouter = require("./routes/post");
 const postsRouter = require("./routes/posts");
+const hashtagRouter = require("./routes/hashtag");
 const userRouter = require("./routes/user");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
@@ -51,6 +52,7 @@ app.use(passport.session());
 app.use("/post", postRouter);
 app.use("/user", userRouter);
 app.use("/posts", postsRouter);
+app.use("/hashtag", hashtagRouter);
 
 app.get("/", (req, res) => {
     res.send("hello express");

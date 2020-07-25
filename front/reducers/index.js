@@ -3,19 +3,20 @@ import user from "./user";
 import post from "./post";
 import { combineReducers } from "redux";
 
-const rootReducer = combineReducers({
-    index: (state = {}, action) => {
-        switch (action.type) {
-            case HYDRATE:
-                console.log("HYDRATE", action);
-                return { ...state, ...action.payload };
+const rootReducer = (state, action) => {
+    switch (action.type) {
+        case HYDRATE:
+            console.log("HYDRATE", action);
+            return action.payload;
 
-            default:
-                return state;
+        default: {
+            const combinedReducer = combineReducers({
+                user,
+                post,
+            });
+            return combinedReducer(state, action);
         }
-    },
-    user,
-    post,
-});
+    }
+};
 
 export default rootReducer;

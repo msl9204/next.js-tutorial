@@ -6,7 +6,10 @@ import { Form, Input, Checkbox, Button } from "antd";
 import useInput from "../components/hooks/useInput";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
-import { SIGN_UP_REQUEST } from "../reducers/user";
+import { SIGN_UP_REQUEST, LOAD_MY_INFO_REQUEST } from "../reducers/user";
+import { END } from "redux-saga";
+import wrapper from "../store/configureStore";
+import axios from "axios";
 
 const ErrorMessage = styled.div`
     color: red;
@@ -159,5 +162,27 @@ const Signup = () => {
         </React.Fragment>
     );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    async (context) => {
+        // 프론트 서버에서 백앤드로 쿠키를 보내줘야 현재 로그인된 사용자를 인식할 수 있다.
+        const cookie = context.req ? context.req.headers.cookie : "";
+        axios.defaults.headers.Cookie = "";
+
+        // 다른 사람이 로그인 되는 현상을 막으려면 이 코드가 필요함.
+        // 쿠키써서 요청 보낼때만 쿠키를 axios 헤더에 넣어줌.
+        if (context.req && cookie) {
+            axios.defaults.headers.Cookie = cookie;
+        }
+
+        context.store.dispatch({
+            type: LOAD_MY_INFO_REQUEST,
+        });
+
+        // 아래부분이 있어서 REQUEST -> SUCCESS 될때까지 기다린 후 랜더링된다.
+        context.store.dispatch(END);
+        await context.store.sagaTask.toPromise();
+    }
+);
 
 export default Signup;

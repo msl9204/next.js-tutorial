@@ -190,6 +190,65 @@ router.delete("/:postId", isLoggedIn, async (req, res, next) => {
     }
 });
 
+router.get("/:postId", async (req, res, next) => {
+    try {
+        const post = await Post.findOne({
+            where: { id: req.params.postId },
+        });
+
+        if (!post) {
+            return res.status(404).send("존재하지 않는 게시글입니다.");
+        }
+        // 자기 게시글 리트윗한거 리트윗 안되게 + 남이 자기 게시들 리트윗한거 내가 리트윗 못하게
+
+        const fullPost = await Post.findOne({
+            where: { id: post.id },
+            // 여기는 어떤 게시글을 리트윗했는지
+            include: [
+                {
+                    model: Post,
+                    as: "Retweet",
+                    include: [
+                        {
+                            model: User,
+                            attributes: ["id", "nickname"],
+                        },
+                        {
+                            model: Image,
+                        },
+                    ],
+                },
+                {
+                    model: User,
+                    attributes: ["id", "nickname"],
+                },
+                {
+                    model: User,
+                    as: "Likers",
+                    attributes: ["id", "nickname"],
+                },
+                {
+                    model: Image,
+                },
+                {
+                    model: Comment,
+                    include: [
+                        {
+                            model: User,
+                            attributes: ["id", "nickname"],
+                        },
+                    ],
+                },
+            ],
+        });
+
+        res.status(200).json(fullPost);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+
 router.post("/:postId/retweet", isLoggedIn, async (req, res, next) => {
     try {
         const post = await Post.findOne({
