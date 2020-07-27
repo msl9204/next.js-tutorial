@@ -6,17 +6,19 @@
   "license": "MIT",
   "scripts": {
     "dev": "next",
-    "build": "webpack",
-    "start": "webpack-dev-server --hot"
+    "build": "ANALYZE=true NODE_ENV=production next build",
+    "start": "ANALYZE=true NODE_ENV=production next start -p 3000"
   },
   "dependencies": {
     "@ant-design/icons": "^4.2.1",
+    "@next/bundle-analyzer": "^9.4.4",
     "antd": "^4.4.1",
     "axios": "^0.19.2",
     "babel-plugin-styled-components": "^1.10.7",
     "eslint-config-airbnb": "^18.2.0",
     "faker": "^4.1.0",
     "immer": "^7.0.5",
+    "moment": "^2.27.0",
     "next": "9",
     "next-redux-wrapper": "^6.0.2",
     "prop-types": "^15.7.2",

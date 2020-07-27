@@ -19,6 +19,11 @@ import {
 } from "../reducers/post";
 import FollowButton from "./FollowButton";
 import PostCardContent from "./PostCardContent";
+import Link from "next/link";
+import moment from "moment";
+
+moment.locale("ko");
+
 export default function PostCard({ post }) {
     const dispatch = useDispatch();
     const { removePostLoading } = useSelector((state) => state.post);
@@ -130,22 +135,45 @@ export default function PostCard({ post }) {
                             )
                         }
                     >
+                        <div style={{ float: "right" }}>
+                            {moment(post.createdAt).format("YYYY.MM.DD")}
+                        </div>
                         <Card.Meta
-                            avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+                            avatar={
+                                <Link href={`/user/${post.Retweet.User.id}`}>
+                                    <a>
+                                        <Avatar>{post.User.nickname[0]}</Avatar>
+                                    </a>
+                                </Link>
+                            }
+                            title={post.Retweet.User.nickname}
+                            description={
+                                <PostCardContent
+                                    postData={post.Retweet.content}
+                                />
+                            }
+                        />
+                    </Card>
+                ) : (
+                    <React.Fragment>
+                        <div style={{ float: "right" }}>
+                            {moment(post.createdAt).format("YYYY.MM.DD")}
+                        </div>
+
+                        <Card.Meta
+                            avatar={
+                                <Link href={`/user/${post.User.id}`}>
+                                    <a>
+                                        <Avatar>{post.User.nickname[0]}</Avatar>
+                                    </a>
+                                </Link>
+                            }
                             title={post.User.nickname}
                             description={
                                 <PostCardContent postData={post.content} />
                             }
                         />
-                    </Card>
-                ) : (
-                    <Card.Meta
-                        avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
-                        title={post.User.nickname}
-                        description={
-                            <PostCardContent postData={post.content} />
-                        }
-                    />
+                    </React.Fragment>
                 )}
             </Card>
             {commentFormOpend && (
@@ -160,7 +188,13 @@ export default function PostCard({ post }) {
                                 <Comment
                                     author={item.nickname}
                                     avatar={
-                                        <Avatar>{item.User.nickname[0]}</Avatar>
+                                        <Link href={`/user/${item.User.id}`}>
+                                            <a>
+                                                <Avatar>
+                                                    {item.User.nickname[0]}
+                                                </Avatar>
+                                            </a>
+                                        </Link>
                                     }
                                     content={item.content}
                                 />

@@ -1,0 +1,14 @@
+.cache
+
+.next
+
+.nuxt
+
+.vuepress/dist
+
+.serverless
+/front/build
+nodebird.pem
+node_modules
+.env
+.next
