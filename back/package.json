@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon app",
-    "start" : "NODE_ENV=production pm2 start app"
+    "start" : "NODE_ENV=production pm2 start app.js"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
